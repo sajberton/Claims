@@ -1,4 +1,5 @@
 using Claims.Auditing;
+using Claims.Services.AuditerServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 
@@ -11,13 +12,13 @@ namespace Claims.Controllers
         
         private readonly ILogger<ClaimsController> _logger;
         private readonly CosmosDbService _cosmosDbService;
-        private readonly Auditer _auditer;
+        private readonly IAuditerServices _auditerServices;
 
-        public ClaimsController(ILogger<ClaimsController> logger, CosmosDbService cosmosDbService, AuditContext auditContext)
+        public ClaimsController(ILogger<ClaimsController> logger, CosmosDbService cosmosDbService, AuditContext auditContext, IAuditerServices auditerServices)
         {
             _logger = logger;
             _cosmosDbService = cosmosDbService;
-            _auditer = new Auditer(auditContext);
+            _auditerServices = auditerServices;
         }
 
         [HttpGet]

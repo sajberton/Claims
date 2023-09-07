@@ -9,9 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{003F7774
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Claims.Tests", "Claims.Tests\Claims.Tests.csproj", "{EC846D1B-22B5-4CED-B0CB-778EBFEE1C33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Claims.Services", "Claims.Services\Claims.Services.csproj", "{82D39A10-7F29-415A-AFE6-C49FD58D56BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Claims.Services", "Claims.Services\Claims.Services.csproj", "{82D39A10-7F29-415A-AFE6-C49FD58D56BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Claims.Models", "Claims.Models\Claims.Models.csproj", "{474C2CD9-E51B-4B97-8FB8-952BF2E1A191}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Claims.Models", "Claims.Models\Claims.Models.csproj", "{474C2CD9-E51B-4B97-8FB8-952BF2E1A191}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Claims.Data", "Claims.Data\Claims.Data.csproj", "{65E39DC7-4D23-4BCB-8628-DABFAB02CF71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{474C2CD9-E51B-4B97-8FB8-952BF2E1A191}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{474C2CD9-E51B-4B97-8FB8-952BF2E1A191}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{474C2CD9-E51B-4B97-8FB8-952BF2E1A191}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65E39DC7-4D23-4BCB-8628-DABFAB02CF71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65E39DC7-4D23-4BCB-8628-DABFAB02CF71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65E39DC7-4D23-4BCB-8628-DABFAB02CF71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65E39DC7-4D23-4BCB-8628-DABFAB02CF71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

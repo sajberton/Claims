@@ -1,10 +1,17 @@
-﻿namespace Claims.Auditing
+﻿using Claims.Auditing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Claims.Services.AuditerServices
 {
-    public class Auditer
+    public class AuditerServices : IAuditerServices
     {
         private readonly AuditContext _auditContext;
 
-        public Auditer(AuditContext auditContext)
+        public AuditerServices(AuditContext auditContext)
         {
             _auditContext = auditContext;
         }
@@ -21,7 +28,7 @@
             _auditContext.Add(claimAudit);
             _auditContext.SaveChanges();
         }
-        
+
         public void AuditCover(string id, string httpRequestType)
         {
             var coverAudit = new CoverAudit()

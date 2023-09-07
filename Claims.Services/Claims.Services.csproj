@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Claims.Data\Claims.Data.csproj" />
     <ProjectReference Include="..\Claims.Models\Claims.Models.csproj" />
   </ItemGroup>
 
