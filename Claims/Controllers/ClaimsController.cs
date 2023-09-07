@@ -32,14 +32,14 @@ namespace Claims.Controllers
         {
             claim.Id = Guid.NewGuid().ToString();
             await _cosmosDbService.AddItemAsync(claim);
-            _auditer.AuditClaim(claim.Id, "POST");
+            _auditerServices.AuditClaim(claim.Id, "POST");
             return Ok(claim);
         }
 
         [HttpDelete("{id}")]
         public Task DeleteAsync(string id)
         {
-            _auditer.AuditClaim(id, "DELETE");
+            _auditerServices.AuditClaim(id, "DELETE");
             return _cosmosDbService.DeleteItemAsync(id);
         }
 

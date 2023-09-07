@@ -2,20 +2,31 @@ using System.Configuration;
 using System.Text.Json.Serialization;
 using Claims.Auditing;
 using Claims.Controllers;
+using Claims.Extensions;
+using Claims.Services.CosmosDBService;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+var services = builder.Services;
 // Add services to the container.
-builder.Services.AddControllers().AddJsonOptions(x =>
+services.AddControllers().AddJsonOptions(x =>
     {
         x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     }
 );
 
-builder.Services.AddSingleton(
+services.AddSingleton(
     InitializeCosmosClientInstanceAsync(builder.Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult());
+
+//services.AddSingleton(x =>
+//{
+//    var cosmosClient = new CosmosClient(cosmosDbEndpoint, cosmosDbKey);
+//    return new CosmosDbService<MyDocumentType>(cosmosClient, databaseName, "YourContainerName");
+//});
+
+services.AddServices();
 
 builder.Services.AddDbContext<AuditContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
