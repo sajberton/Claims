@@ -1,7 +1,10 @@
-﻿namespace Claims.Models
+﻿using Newtonsoft.Json;
+
+namespace Claims.Models
 {
     public class ModelBase
     {
-        public int Id { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        public string Id { get; set; }
     }
 }

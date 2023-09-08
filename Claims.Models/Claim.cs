@@ -1,13 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using Claims.Models;
+using Claims.Models.Enums;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Claims
 {
-    public class Claim
+    public class Claim : ModelBase
     {
-        [JsonProperty(PropertyName = "id")]
-        public string Id { get; set; }
-        
         [JsonProperty(PropertyName = "coverId")]
         public string CoverId { get; set; }
 
@@ -18,18 +17,9 @@ namespace Claims
         public string Name { get; set; }
 
         [JsonProperty(PropertyName = "claimType")]
-        public ClaimType Type { get; set; }
+        public ClaimTypeEnum Type { get; set; }
 
         [JsonProperty(PropertyName = "damageCost")]
         public decimal DamageCost { get; set; }
-
-    }
-
-    public enum ClaimType
-    {
-        Collision = 0,
-        Grounding = 1,
-        BadWeather = 2,
-        Fire = 3
     }
 }

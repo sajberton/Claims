@@ -1,4 +1,5 @@
 using Claims.Auditing;
+using Claims.Models.Enums;
 using Claims.Services.AuditerServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -22,7 +23,7 @@ public class CoversController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverType coverType)
+    public async Task<ActionResult> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
     {
         return Ok(ComputePremium(startDate, endDate, coverType));
     }
@@ -73,20 +74,20 @@ public class CoversController : ControllerBase
         return _container.DeleteItemAsync<Cover>(id, new (id));
     }
 
-    private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
+    private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
     {
         var multiplier = 1.3m;
-        if (coverType == CoverType.Yacht)
+        if (coverType == CoverTypeEnum.Yacht)
         {
             multiplier = 1.1m;
         }
 
-        if (coverType == CoverType.PassengerShip)
+        if (coverType == CoverTypeEnum.PassengerShip)
         {
             multiplier = 1.2m;
         }
 
-        if (coverType == CoverType.Tanker)
+        if (coverType == CoverTypeEnum.Tanker)
         {
             multiplier = 1.5m;
         }
@@ -98,9 +99,9 @@ public class CoversController : ControllerBase
         for (var i = 0; i < insuranceLength; i++)
         {
             if (i < 30) totalPremium += premiumPerDay;
-            if (i < 180 && coverType == CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.05m;
+            if (i < 180 && coverType == CoverTypeEnum.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.05m;
             else if (i < 180) totalPremium += premiumPerDay - premiumPerDay * 0.02m;
-            if (i < 365 && coverType != CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.03m;
+            if (i < 365 && coverType != CoverTypeEnum.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.03m;
             else if (i < 365) totalPremium += premiumPerDay - premiumPerDay * 0.08m;
         }
 
