@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Claims.Models;
+using System.Security.Claims;
 
 namespace Claims.Services.ClaimService
 {
@@ -6,7 +7,7 @@ namespace Claims.Services.ClaimService
     {
         Task<IEnumerable<Claim>> GetAllAsync();
         Task<Claim> GetByIdAsync(string id);
-        Task AddItemAsync(Claim item);
+        Task<ResponseModel> AddItemAsync(Claim item);
         Task DeleteItemAsync(string id);
     }
 }

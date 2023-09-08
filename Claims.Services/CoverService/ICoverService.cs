@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Claims.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Claims.Services.CoverService
     {
         Task<IEnumerable<Cover>> GetAllAsync();
         Task<Cover> GetByIdAsync(string id);
-        Task AddItemAsync(Cover item);
+        Task<ResponseModel> AddItemAsync(Cover cover);
         Task DeleteItemAsync(string id);
     }
 }

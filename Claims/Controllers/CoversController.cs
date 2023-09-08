@@ -1,6 +1,7 @@
 using Claims.Auditing;
 using Claims.Models.Enums;
 using Claims.Services.AuditerServices;
+using Claims.Services.CoverService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 
@@ -13,13 +14,15 @@ public class CoversController : ControllerBase
     private readonly ILogger<CoversController> _logger;
     private readonly IAuditerServices _auditerServices;
     private readonly Container _container;
+    private readonly ICoverService _coverService;
 
-    public CoversController(CosmosClient cosmosClient, AuditContext auditContext, ILogger<CoversController> logger, IAuditerServices auditerServices)
+    public CoversController(CosmosClient cosmosClient, AuditContext auditContext, ILogger<CoversController> logger, IAuditerServices auditerServices, ICoverService coverService)
     {
         _logger = logger;
         _auditerServices = auditerServices;
         _container = cosmosClient?.GetContainer("ClaimDb", "Cover")
                      ?? throw new ArgumentNullException(nameof(cosmosClient));
+        _coverService = coverService;
     }
     
     [HttpPost]
@@ -60,11 +63,23 @@ public class CoversController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateAsync(Cover cover)
     {
-        cover.Id = Guid.NewGuid().ToString();
-        cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
-        await _container.CreateItemAsync(cover, new PartitionKey(cover.Id));
-        _auditerServices.AuditCover(cover.Id, "POST");
-        return Ok(cover);
+        try
+        {
+            var res = await _coverService.AddItemAsync(cover);
+            if (res.IsSuccessful)
+                return Ok();
+            
+            return BadRequest(res.Error);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        //cover.Id = Guid.NewGuid().ToString();
+        //cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
+        //await _container.CreateItemAsync(cover, new PartitionKey(cover.Id));
+        //_auditerServices.AuditCover(cover.Id, "POST");
+        //return Ok(cover);
     }
 
     [HttpDelete("{id}")]

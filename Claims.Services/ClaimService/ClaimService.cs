@@ -3,27 +3,32 @@ using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Claims.Models;
 using Claims.Services.CoverService;
+using Claims.Services.AuditerServices;
+using Utils;
 
 namespace Claims.Services.ClaimService
 {
     public class ClaimService : IClaimService
     {
         private readonly ICosmosDBService<Claim> _cosmosDBService;
-        //private readonly ICoverService coverService;
+        private readonly ICoverService _coverService;
+        private readonly IAuditerServices _auditerServices;
 
-        public ClaimService(ICosmosDBService<Claim> cosmosDBService)
+        public ClaimService(ICosmosDBService<Claim> cosmosDBService, ICoverService coverService, IAuditerServices auditerServices)
         {
             _cosmosDBService = cosmosDBService;
+            _coverService = coverService;
+            _auditerServices = auditerServices;
         }
         public async Task<IEnumerable<Claim>> GetAllAsync()
         {
             return await _cosmosDBService.GetAllAsync();
-           // var query = _cosmosDBService.GetAllAsync<Claim>(new QueryDefinition("SELECT * FROM c"));
+
+            // var query = _cosmosDBService.GetAllAsync<Claim>(new QueryDefinition("SELECT * FROM c"));
 
             //var results = new List<Claim>();
             //while (query.HasMoreResults)
@@ -49,9 +54,45 @@ namespace Claims.Services.ClaimService
             }
         }
 
-        public async Task AddItemAsync(Claim item)
+        public async Task<ResponseModel> AddItemAsync(Claim claim)
         {
-             await _cosmosDBService.AddItemAsync(item);
+            var response = new ResponseModel();
+            try
+            {
+                if (claim.DamageCost > Constants.ClaimsConstants.MaxDamageCost)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "Exceeded Maximum damage cost";
+                    return response;
+                };
+
+                var cover = await _coverService.GetByIdAsync(claim.CoverId);
+                if (cover == null)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "This cover does not exists";
+                    return response;
+                };
+
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                if (cover.EndDate < today)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "This cover has expired";
+                    return response;
+                };
+
+                await _auditerServices.AuditClaim(claim.Id, "POST");
+                var res = await _cosmosDBService.AddItemAsync(claim);
+                response.IsSuccessful = res;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.Error = ex.Message;
+                return response;
+            }
         }
 
         public async Task DeleteItemAsync(string id)

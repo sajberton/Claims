@@ -1,5 +1,6 @@
 using Claims.Auditing;
 using Claims.Services.AuditerServices;
+using Claims.Services.ClaimService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 
@@ -9,16 +10,18 @@ namespace Claims.Controllers
     [Route("[controller]")]
     public class ClaimsController : ControllerBase
     {
-        
+
         private readonly ILogger<ClaimsController> _logger;
         private readonly CosmosDbService _cosmosDbService;
         private readonly IAuditerServices _auditerServices;
+        private readonly IClaimService _claimService;
 
-        public ClaimsController(ILogger<ClaimsController> logger, CosmosDbService cosmosDbService, AuditContext auditContext, IAuditerServices auditerServices)
+        public ClaimsController(ILogger<ClaimsController> logger, CosmosDbService cosmosDbService, AuditContext auditContext, IAuditerServices auditerServices, IClaimService claimService)
         {
             _logger = logger;
             _cosmosDbService = cosmosDbService;
             _auditerServices = auditerServices;
+            _claimService = claimService;
         }
 
         [HttpGet]
@@ -30,10 +33,22 @@ namespace Claims.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateAsync(Claim claim)
         {
-            claim.Id = Guid.NewGuid().ToString();
-            await _cosmosDbService.AddItemAsync(claim);
-            _auditerServices.AuditClaim(claim.Id, "POST");
-            return Ok(claim);
+            try
+            {
+                var res = await _claimService.AddItemAsync(claim);
+                if (res.IsSuccessful)
+                    return Ok();
+                else
+                    return BadRequest(res.Error);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            //claim.Id = Guid.NewGuid().ToString();
+            //await _cosmosDbService.AddItemAsync(claim);
+            //_auditerServices.AuditClaim(claim.Id, "POST");
+            //return Ok(claim);
         }
 
         [HttpDelete("{id}")]

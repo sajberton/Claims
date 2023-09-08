@@ -1,11 +1,14 @@
-﻿using Claims.Models.Enums;
+﻿using Claims.Models;
+using Claims.Models.Enums;
 using Claims.Services.AuditerServices;
 using Claims.Services.CosmosDBService;
+//using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utils;
 
 namespace Claims.Services.CoverService
 {
@@ -19,19 +22,46 @@ namespace Claims.Services.CoverService
             _cosmosDBService = cosmosDBService;
             _auditerServices = auditerServices;
         }
-        public async Task AddItemAsync(Cover cover)
+        public async Task<ResponseModel> AddItemAsync(Cover cover)
         {
-            cover.Id = Guid.NewGuid().ToString();
-            cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
-            await _cosmosDBService.AddItemAsync(cover);
-            _auditerServices.AuditCover(cover.Id, "POST");
-          //  return Ok(cover);
+            var response = new ResponseModel();
+            try
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                if (cover.StartDate < today)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "StartDate cannot be in the past";
+                    return response;
+                };
+
+                int insurancePeriod = (cover.EndDate.DayNumber - cover.StartDate.DayNumber);
+                if (insurancePeriod > Constants.CoverConstants.MaxPeriodDays)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "Total insurance period cannot exceed 1 year";
+                    return response;
+                };
+
+                cover.Id = Guid.NewGuid().ToString();
+                cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
+                await _auditerServices.AuditCover(cover.Id, "POST");
+                var res = await _cosmosDBService.AddItemAsync(cover);
+                response.IsSuccessful = res;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.Error = ex.Message;
+                return response;
+            }
         }
 
         public async Task DeleteItemAsync(string id)
         {
-            _auditerServices.AuditCover(id, "DELETE");
-           await _cosmosDBService.DeleteItemAsync(id);
+            await _auditerServices.AuditCover(id, "DELETE");
+            await _cosmosDBService.DeleteItemAsync(id);
         }
 
         public async Task<IEnumerable<Cover>> GetAllAsync()

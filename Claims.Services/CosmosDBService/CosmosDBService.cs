@@ -85,9 +85,14 @@ namespace Claims.Services.CosmosDBService
             }
         }
 
-        public Task AddItemAsync(T item)
+        public async Task<bool> AddItemAsync(T item)
         {
-            return _container.CreateItemAsync(item, new PartitionKey(item.Id));
+            var response = await _container.CreateItemAsync(item, new PartitionKey(item.Id));
+            if(response.StatusCode == System.Net.HttpStatusCode.OK 
+                || response.StatusCode == System.Net.HttpStatusCode.Accepted) 
+            { 
+                return true;
+            }
         }
 
         public Task DeleteItemAsync(string id)

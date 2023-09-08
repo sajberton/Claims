@@ -13,7 +13,7 @@ namespace Claims.Services.CosmosDBService
         Task<IEnumerable<T>> GetAllAsync();
         Task<T> GetByIdAsync(string id);
 
-        Task AddItemAsync(T entity);
+        Task<bool> AddItemAsync(T entity);
         Task DeleteItemAsync(string id);
     };
 }
