@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using Azure;
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,9 +51,15 @@ namespace Claims.Services
             await _container.CreateItemAsync(item, new PartitionKey(item.Id));
         }
 
-        public Task DeleteItemAsync(string id)
+        public async Task<bool> DeleteItemAsync(string id)
         {
-            return _container.DeleteItemAsync<Claim>(id, new PartitionKey(id));
+            var response = await _container.DeleteItemAsync<Claim>(id, new PartitionKey(id));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK
+               || response.StatusCode == System.Net.HttpStatusCode.Accepted)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

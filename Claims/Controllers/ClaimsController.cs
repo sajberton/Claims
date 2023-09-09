@@ -3,6 +3,10 @@ using Claims.Services.AuditerServices;
 using Claims.Services.ClaimService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Logging;
+using System.Net;
+using System;
+using System.Security.Claims;
 
 namespace Claims.Controllers
 {
@@ -12,20 +16,26 @@ namespace Claims.Controllers
     {
 
         private readonly ILogger<ClaimsController> _logger;
-        private readonly IAuditerServices _auditerServices;
         private readonly IClaimService _claimService;
 
-        public ClaimsController(ILogger<ClaimsController> logger, AuditContext auditContext, IAuditerServices auditerServices, IClaimService claimService)
+        public ClaimsController(ILogger<ClaimsController> logger, IClaimService claimService)
         {
             _logger = logger;
-            _auditerServices = auditerServices;
             _claimService = claimService;
         }
 
         [HttpGet]
-        public Task<IEnumerable<Claim>> GetAsync()
+        public async Task<ActionResult<IEnumerable<Claim>>> GetAsync()
         {
-            return _claimService.GetAllAsync();
+            try
+            {
+                return Ok(await _claimService.GetAllAsync());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(0, ex, "Error while Get Claims");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [HttpPost]
@@ -41,74 +51,41 @@ namespace Claims.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(0, ex, "Error while Create Claim request for {claim}", claim);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
-            //claim.Id = Guid.NewGuid().ToString();
-            //await _cosmosDbService.AddItemAsync(claim);
-            //_auditerServices.AuditClaim(claim.Id, "POST");
-            //return Ok(claim);
         }
 
         [HttpDelete("{id}")]
-        public Task DeleteAsync(string id)
+        public async Task<ActionResult> DeleteAsync(string id)
         {
-            _auditerServices.AuditClaim(id, "DELETE");
-            return _claimService.DeleteItemAsync(id);
+            try
+            {
+                var res = await _claimService.DeleteItemAsync(id);
+                if (res.IsSuccessful)
+                    return Ok();
+                else
+                    return BadRequest(res.Error);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(0, ex, "Error while Delete claim request for {id} id", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
-        public Task<Claim> GetAsync(string id)
+        public async Task<ActionResult<Claim>> GetAsync(string id)
         {
-            return _claimService.GetByIdAsync(id);
+            try
+            {
+                return Ok(await _claimService.GetByIdAsync(id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(0, ex, "Error while Get claim request for {id} Id", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
-
-    //public class CosmosDbService
-    //{
-    //    private readonly Container _container;
-
-    //    public CosmosDbService(CosmosClient dbClient,
-    //        string databaseName,
-    //        string containerName)
-    //    {
-    //        if (dbClient == null) throw new ArgumentNullException(nameof(dbClient));
-    //        _container = dbClient.GetContainer(databaseName, containerName);
-    //    }
-
-    //    public async Task<IEnumerable<Claim>> GetClaimsAsync()
-    //    {
-    //        var query = _container.GetItemQueryIterator<Claim>(new QueryDefinition("SELECT * FROM c"));
-    //        var results = new List<Claim>();
-    //        while (query.HasMoreResults)
-    //        {
-    //            var response = await query.ReadNextAsync();
-
-    //            results.AddRange(response.ToList());
-    //        }
-    //        return results;
-    //    }
-
-    //    public async Task<Claim> GetClaimAsync(string id)
-    //    {
-    //        try
-    //        {
-    //            var response = await _container.ReadItemAsync<Claim>(id, new PartitionKey(id));
-    //            return response.Resource;
-    //        }
-    //        catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-    //        {
-    //            return null;
-    //        }
-    //    }
-
-    //    public Task AddItemAsync(Claim item)
-    //    {
-    //        return _container.CreateItemAsync(item, new PartitionKey(item.Id));
-    //    }
-
-    //    public Task DeleteItemAsync(string id)
-    //    {
-    //        return _container.DeleteItemAsync<Claim>(id, new PartitionKey(id));
-    //    }
-    //}
 }

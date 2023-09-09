@@ -95,9 +95,21 @@ namespace Claims.Services.ClaimService
             }
         }
 
-        public async Task DeleteItemAsync(string id)
+        public async Task<ResponseModel> DeleteItemAsync(string id)
         {
-            await _cosmosDBService.DeleteItemAsync(id);
+            var response = new ResponseModel();
+            try
+            {
+                var res = await _cosmosDBService.DeleteItemAsync(id);
+                response.IsSuccessful = res;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.Error=ex.Message;
+                return response;
+            }
         }
     }
 }

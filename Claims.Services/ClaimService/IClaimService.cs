@@ -8,6 +8,6 @@ namespace Claims.Services.ClaimService
         Task<IEnumerable<Claim>> GetAllAsync();
         Task<Claim> GetByIdAsync(string id);
         Task<ResponseModel> AddItemAsync(Claim item);
-        Task DeleteItemAsync(string id);
+        Task<ResponseModel> DeleteItemAsync(string id);
     }
 }
