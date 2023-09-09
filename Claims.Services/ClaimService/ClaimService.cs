@@ -66,21 +66,21 @@ namespace Claims.Services.ClaimService
                     return response;
                 };
 
-                //var cover = await _coverService.GetByIdAsync(claim.CoverId);
-                //if (cover == null)
-                //{
-                //    response.IsSuccessful = false;
-                //    response.Error = "This cover does not exists";
-                //    return response;
-                //};
+                var cover = await _coverService.GetByIdAsync(claim.CoverId);
+                if (cover == null)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "This cover does not exists";
+                    return response;
+                };
 
-                //var today = DateOnly.FromDateTime(DateTime.UtcNow);
-                //if (cover.EndDate < today)
-                //{
-                //    response.IsSuccessful = false;
-                //    response.Error = "This cover has expired";
-                //    return response;
-                //};
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                if (cover.EndDate < today)
+                {
+                    response.IsSuccessful = false;
+                    response.Error = "This cover has expired";
+                    return response;
+                };
 
                 await _auditerServices.AuditClaim(claim.Id, "POST");
                 await _cosmosDBService.AddItemAsync(claim);

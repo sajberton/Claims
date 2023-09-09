@@ -13,19 +13,19 @@ public class CoversController : ControllerBase
 {
     private readonly ILogger<CoversController> _logger;
     private readonly IAuditerServices _auditerServices;
-    private readonly Container _container;
+   // private readonly Container _container;
     private readonly ICoverService _coverService;
 
-    public CoversController(CosmosClient cosmosClient, AuditContext auditContext, ILogger<CoversController> logger, IAuditerServices auditerServices, ICoverService coverService)
+    public CoversController(AuditContext auditContext, ILogger<CoversController> logger, IAuditerServices auditerServices, ICoverService coverService)
     {
         _logger = logger;
         _auditerServices = auditerServices;
-        _container = cosmosClient?.GetContainer("ClaimDb", "Cover")
-                     ?? throw new ArgumentNullException(nameof(cosmosClient));
+        //_container = cosmosClient?.GetContainer("ClaimDb", "Cover")
+        //             ?? throw new ArgumentNullException(nameof(cosmosClient));
         _coverService = coverService;
     }
     
-    [HttpPost]
+    [HttpPost("compute")]
     public async Task<ActionResult> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
     {
         return Ok(ComputePremium(startDate, endDate, coverType));
@@ -34,16 +34,17 @@ public class CoversController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Cover>>> GetAsync()
     {
-        var query = _container.GetItemQueryIterator<Cover>(new QueryDefinition("SELECT * FROM c"));
-        var results = new List<Cover>();
-        while (query.HasMoreResults)
-        {
-            var response = await query.ReadNextAsync();
+        return Ok(await _coverService.GetAllAsync());
+        //var query = _container.GetItemQueryIterator<Cover>(new QueryDefinition("SELECT * FROM c"));
+        //var results = new List<Cover>();
+        //while (query.HasMoreResults)
+        //{
+        //    var response = await query.ReadNextAsync();
 
-            results.AddRange(response.ToList());
-        }
+        //    results.AddRange(response.ToList());
+        //}
 
-        return Ok(results);
+        //return Ok(results);
     }
 
     [HttpGet("{id}")]
@@ -51,8 +52,8 @@ public class CoversController : ControllerBase
     {
         try
         {
-            var response = await _container.ReadItemAsync<Cover>(id, new (id));
-            return Ok(response.Resource);
+            var response = await _coverService.GetByIdAsync(id);
+            return Ok(response);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
@@ -86,7 +87,7 @@ public class CoversController : ControllerBase
     public Task DeleteAsync(string id)
     {
         _auditerServices.AuditCover(id, "DELETE");
-        return _container.DeleteItemAsync<Cover>(id, new (id));
+        return _coverService.DeleteItemAsync(id);
     }
 
     private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
