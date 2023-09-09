@@ -46,9 +46,15 @@ namespace Claims.Services
             }
         }
 
-        public async Task AddItemAsync(Claim item)
+        public async Task<bool> AddItemAsync(Claim item)
         {
-            await _container.CreateItemAsync(item, new PartitionKey(item.Id));
+            var response = await _container.CreateItemAsync(item, new PartitionKey(item.Id));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK
+                || response.StatusCode == System.Net.HttpStatusCode.Accepted)
+            {
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> DeleteItemAsync(string id)

@@ -27,31 +27,11 @@ namespace Claims.Services.ClaimService
         public async Task<IEnumerable<Claim>> GetAllAsync()
         {
             return await _cosmosDBService.GetClaimsAsync();
-
-            // var query = _cosmosDBService.GetAllAsync<Claim>(new QueryDefinition("SELECT * FROM c"));
-
-            //var results = new List<Claim>();
-            //while (query.HasMoreResults)
-            //{
-            //    var response = await query.ReadNextAsync();
-
-            //    results.AddRange(response.ToList());
-            //}
-            //return results;
         }
 
         public async Task<Claim> GetByIdAsync(string id)
         {
-            try
-            {
-                return await _cosmosDBService.GetClaimAsync(id);
-                //var response = await _container.ReadItemAsync<Claim>(id, new PartitionKey(id));
-                //return response.Resource;
-            }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
+            return await _cosmosDBService.GetClaimAsync(id);
         }
 
         public async Task<ResponseModel> AddItemAsync(Claim claim)
@@ -82,9 +62,9 @@ namespace Claims.Services.ClaimService
                     return response;
                 };
 
+                claim.Id = Guid.NewGuid().ToString();
                 await _auditerServices.AuditClaim(claim.Id, "POST");
-                await _cosmosDBService.AddItemAsync(claim);
-                response.IsSuccessful = true;
+                response.IsSuccessful = await _cosmosDBService.AddItemAsync(claim); ;
                 return response;
             }
             catch (Exception ex)
@@ -100,6 +80,7 @@ namespace Claims.Services.ClaimService
             var response = new ResponseModel();
             try
             {
+                await _auditerServices.AuditClaim(id, "DELETE");
                 var res = await _cosmosDBService.DeleteItemAsync(id);
                 response.IsSuccessful = res;
                 return response;
@@ -107,7 +88,7 @@ namespace Claims.Services.ClaimService
             catch (Exception ex)
             {
                 response.IsSuccessful = false;
-                response.Error=ex.Message;
+                response.Error = ex.Message;
                 return response;
             }
         }
