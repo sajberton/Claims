@@ -14,11 +14,11 @@ namespace Claims.Services.ClaimService
 {
     public class ClaimService : IClaimService
     {
-        private readonly ICosmosDBService<Claim> _cosmosDBService;
+        private readonly CosmosClaimService _cosmosDBService;
         private readonly ICoverService _coverService;
         private readonly IAuditerServices _auditerServices;
 
-        public ClaimService(ICosmosDBService<Claim> cosmosDBService, ICoverService coverService, IAuditerServices auditerServices)
+        public ClaimService(CosmosClaimService cosmosDBService, ICoverService coverService, IAuditerServices auditerServices)
         {
             _cosmosDBService = cosmosDBService;
             _coverService = coverService;
@@ -26,7 +26,7 @@ namespace Claims.Services.ClaimService
         }
         public async Task<IEnumerable<Claim>> GetAllAsync()
         {
-            return await _cosmosDBService.GetAllAsync();
+            return await _cosmosDBService.GetClaimsAsync();
 
             // var query = _cosmosDBService.GetAllAsync<Claim>(new QueryDefinition("SELECT * FROM c"));
 
@@ -44,7 +44,7 @@ namespace Claims.Services.ClaimService
         {
             try
             {
-                return await _cosmosDBService.GetByIdAsync(id);
+                return await _cosmosDBService.GetClaimAsync(id);
                 //var response = await _container.ReadItemAsync<Claim>(id, new PartitionKey(id));
                 //return response.Resource;
             }
@@ -66,25 +66,25 @@ namespace Claims.Services.ClaimService
                     return response;
                 };
 
-                var cover = await _coverService.GetByIdAsync(claim.CoverId);
-                if (cover == null)
-                {
-                    response.IsSuccessful = false;
-                    response.Error = "This cover does not exists";
-                    return response;
-                };
+                //var cover = await _coverService.GetByIdAsync(claim.CoverId);
+                //if (cover == null)
+                //{
+                //    response.IsSuccessful = false;
+                //    response.Error = "This cover does not exists";
+                //    return response;
+                //};
 
-                var today = DateOnly.FromDateTime(DateTime.UtcNow);
-                if (cover.EndDate < today)
-                {
-                    response.IsSuccessful = false;
-                    response.Error = "This cover has expired";
-                    return response;
-                };
+                //var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                //if (cover.EndDate < today)
+                //{
+                //    response.IsSuccessful = false;
+                //    response.Error = "This cover has expired";
+                //    return response;
+                //};
 
                 await _auditerServices.AuditClaim(claim.Id, "POST");
-                var res = await _cosmosDBService.AddItemAsync(claim);
-                response.IsSuccessful = res;
+                await _cosmosDBService.AddItemAsync(claim);
+                response.IsSuccessful = true;
                 return response;
             }
             catch (Exception ex)

@@ -93,6 +93,7 @@ namespace Claims.Services.CosmosDBService
             { 
                 return true;
             }
+            return false;
         }
 
         public Task DeleteItemAsync(string id)

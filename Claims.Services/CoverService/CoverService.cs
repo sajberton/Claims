@@ -14,10 +14,10 @@ namespace Claims.Services.CoverService
 {
     public class CoverService : ICoverService
     {
-        private readonly ICosmosDBService<Cover> _cosmosDBService;
+        private readonly CosmosCoverService _cosmosDBService;
         private readonly IAuditerServices _auditerServices;
 
-        public CoverService(ICosmosDBService<Cover> cosmosDBService, IAuditerServices auditerServices)
+        public CoverService(CosmosCoverService cosmosDBService, IAuditerServices auditerServices)
         {
             _cosmosDBService = cosmosDBService;
             _auditerServices = auditerServices;
@@ -46,8 +46,8 @@ namespace Claims.Services.CoverService
                 cover.Id = Guid.NewGuid().ToString();
                 cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
                 await _auditerServices.AuditCover(cover.Id, "POST");
-                var res = await _cosmosDBService.AddItemAsync(cover);
-                response.IsSuccessful = res;
+                await _cosmosDBService.AddItemAsync(cover);
+                response.IsSuccessful = true;
                 return response;
             }
             catch (Exception ex)
@@ -66,12 +66,12 @@ namespace Claims.Services.CoverService
 
         public async Task<IEnumerable<Cover>> GetAllAsync()
         {
-            return await _cosmosDBService.GetAllAsync();
+            return await _cosmosDBService.GetClaimsAsync();
         }
 
         public async Task<Cover> GetByIdAsync(string id)
         {
-            return await _cosmosDBService.GetByIdAsync(id);
+            return await _cosmosDBService.GetClaimAsync(id);
         }
 
         private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
