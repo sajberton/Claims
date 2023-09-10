@@ -26,7 +26,7 @@ namespace Claims.Services.ClaimService
         }
         public async Task<IEnumerable<Claim>> GetAllAsync()
         {
-            return await _cosmosDBService.GetClaimsAsync();
+            return await _cosmosDBService.GetAllAsync();
         }
 
         public async Task<Claim> GetByIdAsync(string id)

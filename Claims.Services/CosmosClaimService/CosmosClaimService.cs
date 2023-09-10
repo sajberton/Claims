@@ -20,7 +20,7 @@ namespace Claims.Services
             _container = dbClient.GetContainer(databaseName, containerName);
         }
 
-        public async Task<IEnumerable<Claim>> GetClaimsAsync()
+        public async Task<IEnumerable<Claim>> GetAllAsync()
         {
             var query = _container.GetItemQueryIterator<Claim>(new QueryDefinition("SELECT * FROM c"));
             var results = new List<Claim>();
