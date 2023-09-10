@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Claims.Auditing;
+using Claims.CosmosDbServices.CosmosCoverService;
 using Claims.Extensions;
 using Claims.Services;
 using Microsoft.Azure.Cosmos;

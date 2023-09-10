@@ -11,10 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Claims.CosmosDbServices\Claims.CosmosDbServices.csproj" />
-    <ProjectReference Include="..\Claims.Data\Claims.Data.csproj" />
     <ProjectReference Include="..\Claims.Models\Claims.Models.csproj" />
-    <ProjectReference Include="..\Utils\Utils.csproj" />
   </ItemGroup>
 
 </Project>

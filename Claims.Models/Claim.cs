@@ -3,7 +3,7 @@ using Claims.Models.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Claims
+namespace Claims.Models
 {
     public class Claim : ModelBase
     {

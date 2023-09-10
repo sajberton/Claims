@@ -1,5 +1,4 @@
 ﻿using Claims.Models;
-using System.Security.Claims;
 
 namespace Claims.Services.ClaimService
 {

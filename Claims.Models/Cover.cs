@@ -2,7 +2,8 @@ using Claims.Models;
 using Claims.Models.Enums;
 using Newtonsoft.Json;
 
-namespace Claims;
+namespace Claims.Models;
+
 
 public class Cover : ModelBase
 {

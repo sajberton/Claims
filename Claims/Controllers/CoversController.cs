@@ -1,4 +1,5 @@
 using Claims.Auditing;
+using Claims.Models;
 using Claims.Models.Enums;
 using Claims.Services.CoverService;
 using Microsoft.AspNetCore.Mvc;

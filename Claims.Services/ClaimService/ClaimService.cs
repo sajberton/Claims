@@ -2,6 +2,7 @@
 using Claims.Services.CoverService;
 using Claims.Services.AuditerServices;
 using Utils;
+using Claims.CosmosDbServices;
 
 namespace Claims.Services.ClaimService
 {

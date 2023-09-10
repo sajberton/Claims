@@ -1,4 +1,5 @@
-﻿using Claims.Models;
+﻿using Claims.CosmosDbServices.CosmosCoverService;
+using Claims.Models;
 using Claims.Models.Enums;
 using Claims.Services.AuditerServices;
 using Utils;

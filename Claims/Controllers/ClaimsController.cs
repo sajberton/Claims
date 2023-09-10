@@ -6,7 +6,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System;
-using System.Security.Claims;
+using Claims.Models;
 
 namespace Claims.Controllers
 {
