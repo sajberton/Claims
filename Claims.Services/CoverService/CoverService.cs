@@ -14,10 +14,10 @@ namespace Claims.Services.CoverService
 {
     public class CoverService : ICoverService
     {
-        private readonly CosmosCoverService _cosmosDBService;
+        private readonly ICosmosCoverService _cosmosDBService;
         private readonly IAuditerServices _auditerServices;
 
-        public CoverService(CosmosCoverService cosmosDBService, IAuditerServices auditerServices)
+        public CoverService(ICosmosCoverService cosmosDBService, IAuditerServices auditerServices)
         {
             _cosmosDBService = cosmosDBService;
             _auditerServices = auditerServices;
@@ -46,8 +46,7 @@ namespace Claims.Services.CoverService
                 cover.Id = Guid.NewGuid().ToString();
                 cover.Premium = await ComputePremiumAsync(cover.StartDate, cover.EndDate, cover.Type);
                 await _auditerServices.AuditCover(cover.Id, "POST");
-                await _cosmosDBService.AddItemAsync(cover);
-                response.IsSuccessful = true;
+                response.IsSuccessful = await _cosmosDBService.AddItemAsync(cover); ;
                 return response;
             }
             catch (Exception ex)

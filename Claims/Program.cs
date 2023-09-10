@@ -109,7 +109,7 @@ static async Task<ICosmosClaimService> InitializeCosmosClaimServiceAsync(IConfig
     return cosmosDbService;
 }
 
-static async Task<CosmosCoverService> InitializeCosmosCoverServiceAsync(IConfigurationSection configurationSection, CosmosClient client)
+static async Task<ICosmosCoverService> InitializeCosmosCoverServiceAsync(IConfigurationSection configurationSection, CosmosClient client)
 {
     string databaseName = configurationSection.GetSection("DatabaseName").Value;
     string containerName = configurationSection.GetSection("ContainerNameCover").Value;

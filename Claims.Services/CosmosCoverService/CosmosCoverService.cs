@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Claims.Services;
 using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Claims.Services
 {
-    public class CosmosCoverService
+    public class CosmosCoverService : ICosmosCoverService
     {
         private readonly Container _container;
 
@@ -46,9 +47,16 @@ namespace Claims.Services
             }
         }
 
-        public async Task AddItemAsync(Cover item)
+        public async Task<bool> AddItemAsync(Cover item)
         {
-            await _container.CreateItemAsync(item, new PartitionKey(item.Id));
+            var response = await _container.CreateItemAsync(item, new PartitionKey(item.Id));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK
+               || response.StatusCode == System.Net.HttpStatusCode.Accepted
+               || response.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                return true;
+            }
+            return false;
         }
 
         public async Task<bool> DeleteItemAsync(string id)

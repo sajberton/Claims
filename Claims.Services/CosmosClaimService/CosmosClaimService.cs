@@ -50,7 +50,8 @@ namespace Claims.Services
         {
             var response = await _container.CreateItemAsync(item, new PartitionKey(item.Id));
             if (response.StatusCode == System.Net.HttpStatusCode.OK
-                || response.StatusCode == System.Net.HttpStatusCode.Accepted)
+                || response.StatusCode == System.Net.HttpStatusCode.Accepted
+                || response.StatusCode == System.Net.HttpStatusCode.Created)
             {
                 return true;
             }
