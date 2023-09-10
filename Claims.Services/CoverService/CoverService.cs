@@ -31,7 +31,7 @@ namespace Claims.Services.CoverService
                 if (cover.StartDate < today)
                 {
                     response.IsSuccessful = false;
-                    response.Error = "StartDate cannot be in the past";
+                    response.Error = "Start Date cannot be in the past";
                     return response;
                 };
 
@@ -44,7 +44,7 @@ namespace Claims.Services.CoverService
                 };
 
                 cover.Id = Guid.NewGuid().ToString();
-                cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
+                cover.Premium = await ComputePremiumAsync(cover.StartDate, cover.EndDate, cover.Type);
                 await _auditerServices.AuditCover(cover.Id, "POST");
                 await _cosmosDBService.AddItemAsync(cover);
                 response.IsSuccessful = true;
@@ -58,53 +58,69 @@ namespace Claims.Services.CoverService
             }
         }
 
-        public async Task DeleteItemAsync(string id)
+        public async Task<ResponseModel> DeleteItemAsync(string id)
         {
-            await _auditerServices.AuditCover(id, "DELETE");
-            await _cosmosDBService.DeleteItemAsync(id);
+            var response = new ResponseModel();
+            try
+            {
+                await _auditerServices.AuditCover(id, "DELETE");
+                var res = await _cosmosDBService.DeleteItemAsync(id);
+                response.IsSuccessful = res;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccessful = false;
+                response.Error = ex.Message;
+                return response;
+            }
         }
 
         public async Task<IEnumerable<Cover>> GetAllAsync()
         {
-            return await _cosmosDBService.GetClaimsAsync();
+            return await _cosmosDBService.GetAllAsync();
         }
 
         public async Task<Cover> GetByIdAsync(string id)
         {
-            return await _cosmosDBService.GetClaimAsync(id);
+            return await _cosmosDBService.GetByIdAsync(id);
         }
-
-        private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
+        public async Task<decimal> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverTypeEnum coverType)
         {
-            var multiplier = 1.3m;
-            if (coverType == CoverTypeEnum.Yacht)
+            decimal basePremiumPerDay = 1250;
+            decimal multiplier = 1.3m;
+
+            switch (coverType)
             {
-                multiplier = 1.1m;
+                case CoverTypeEnum.Yacht:
+                    multiplier = 1.1m;
+                    break;
+                case CoverTypeEnum.PassengerShip:
+                    multiplier = 1.2m;
+                    break;
+                case CoverTypeEnum.Tanker:
+                    multiplier = 1.5m;
+                    break;
             }
 
-            if (coverType == CoverTypeEnum.PassengerShip)
+            decimal totalPremium = 0m;
+            int insuranceLength = endDate.DayNumber - startDate.DayNumber;
+
+            for (int i = 0; i < insuranceLength; i++)
             {
-                multiplier = 1.2m;
+                if (i < 30)
+                {
+                    totalPremium += basePremiumPerDay * multiplier;
+                }
+                else if (i < 180)
+                {
+                    totalPremium += basePremiumPerDay * multiplier * (coverType == CoverTypeEnum.Yacht ? 0.95m : 0.98m);
+                }
+                else
+                {
+                    totalPremium += basePremiumPerDay * multiplier * (coverType == CoverTypeEnum.Yacht ? 0.92m : 0.97m);
+                }
             }
-
-            if (coverType == CoverTypeEnum.Tanker)
-            {
-                multiplier = 1.5m;
-            }
-
-            var premiumPerDay = 1250 * multiplier;
-            var insuranceLength = endDate.DayNumber - startDate.DayNumber;
-            var totalPremium = 0m;
-
-            for (var i = 0; i < insuranceLength; i++)
-            {
-                if (i < 30) totalPremium += premiumPerDay;
-                if (i < 180 && coverType == CoverTypeEnum.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.05m;
-                else if (i < 180) totalPremium += premiumPerDay - premiumPerDay * 0.02m;
-                if (i < 365 && coverType != CoverTypeEnum.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.03m;
-                else if (i < 365) totalPremium += premiumPerDay - premiumPerDay * 0.08m;
-            }
-
             return totalPremium;
         }
     }

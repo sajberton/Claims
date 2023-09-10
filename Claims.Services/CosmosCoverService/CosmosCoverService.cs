@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using Azure;
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Claims.Services
             _container = dbClient.GetContainer(databaseName, containerName);
         }
 
-        public async Task<IEnumerable<Cover>> GetClaimsAsync()
+        public async Task<IEnumerable<Cover>> GetAllAsync()
         {
             var query = _container.GetItemQueryIterator<Cover>(new QueryDefinition("SELECT * FROM c"));
             var results = new List<Cover>();
@@ -32,7 +33,7 @@ namespace Claims.Services
             return results;
         }
 
-        public async Task<Cover> GetClaimAsync(string id)
+        public async Task<Cover> GetByIdAsync(string id)
         {
             try
             {
@@ -50,9 +51,15 @@ namespace Claims.Services
             await _container.CreateItemAsync(item, new PartitionKey(item.Id));
         }
 
-        public Task DeleteItemAsync(string id)
+        public async Task<bool> DeleteItemAsync(string id)
         {
-            return _container.DeleteItemAsync<Cover>(id, new PartitionKey(id));
+            var response = await _container.DeleteItemAsync<Cover>(id, new PartitionKey(id));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK
+               || response.StatusCode == System.Net.HttpStatusCode.Accepted)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
