@@ -1,10 +1,7 @@
-using System.Configuration;
 using System.Text.Json.Serialization;
 using Claims.Auditing;
-using Claims.Controllers;
 using Claims.Extensions;
 using Claims.Services;
-using Claims.Services.CosmosDBService;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,16 +22,6 @@ services.AddSingleton(
 
 services.AddSingleton(
     InitializeCosmosCoverServiceAsync(builder.Configuration.GetSection("CosmosDb"), cosmosClient).GetAwaiter().GetResult());
-
-//services.AddSingleton(x =>
-//{
-//    return new CosmosClaimService(cosmosClient, "ClaimDb", "Claim");
-//});
-
-//services.AddSingleton(x =>
-//{
-//    return new CosmosCoverService(cosmosClient, "ClaimDb", "Cover");
-//});
 
 services.AddServices();
 
@@ -66,20 +53,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
-
-//static async Task<CosmosClaimService> InitializeCosmosClientInstanceAsync(IConfigurationSection configurationSection)
-//{
-//    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-//    string containerName = configurationSection.GetSection("ContainerName").Value;
-//    string account = configurationSection.GetSection("Account").Value;
-//    string key = configurationSection.GetSection("Key").Value;
-//    Microsoft.Azure.Cosmos.CosmosClient client = new Microsoft.Azure.Cosmos.CosmosClient(account, key);
-//    CosmosClaimService cosmosDbService = new CosmosClaimService(client, databaseName, containerName);
-//    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-//    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
-
-//    return cosmosDbService;
-//}
 
 static async Task<CosmosClient> InitializeCosmosClientInstanceAsync(IConfigurationSection configurationSection)
 {

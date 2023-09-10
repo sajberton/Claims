@@ -1,8 +1,6 @@
 ﻿using Claims.Services.AuditerServices;
 using Claims.Services.ClaimService;
-using Claims.Services.CosmosDBService;
 using Claims.Services.CoverService;
-using Microsoft.Azure.Cosmos;
 
 namespace Claims.Extensions
 {

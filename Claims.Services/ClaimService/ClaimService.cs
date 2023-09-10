@@ -1,11 +1,4 @@
-﻿using Claims.Services.CosmosDBService;
-using Microsoft.Azure.Cosmos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Claims.Models;
+﻿using Claims.Models;
 using Claims.Services.CoverService;
 using Claims.Services.AuditerServices;
 using Utils;
