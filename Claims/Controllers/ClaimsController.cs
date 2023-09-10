@@ -39,7 +39,7 @@ namespace Claims.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateAsync(Claim claim)
+        public async Task<ActionResult> CreateAsync([FromBody] Claim claim)
         {
             try
             {

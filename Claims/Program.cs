@@ -95,7 +95,7 @@ static async Task<CosmosClient> InitializeCosmosClientInstanceAsync(IConfigurati
     return client;
 }
 
-static async Task<CosmosClaimService> InitializeCosmosClaimServiceAsync(IConfigurationSection configurationSection, CosmosClient client)
+static async Task<ICosmosClaimService> InitializeCosmosClaimServiceAsync(IConfigurationSection configurationSection, CosmosClient client)
 {
     string databaseName = configurationSection.GetSection("DatabaseName").Value;
     string containerName = configurationSection.GetSection("ContainerName").Value;

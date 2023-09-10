@@ -14,11 +14,11 @@ namespace Claims.Services.ClaimService
 {
     public class ClaimService : IClaimService
     {
-        private readonly CosmosClaimService _cosmosDBService;
+        private readonly ICosmosClaimService _cosmosDBService;
         private readonly ICoverService _coverService;
         private readonly IAuditerServices _auditerServices;
 
-        public ClaimService(CosmosClaimService cosmosDBService, ICoverService coverService, IAuditerServices auditerServices)
+        public ClaimService(ICosmosClaimService cosmosDBService, ICoverService coverService, IAuditerServices auditerServices)
         {
             _cosmosDBService = cosmosDBService;
             _coverService = coverService;

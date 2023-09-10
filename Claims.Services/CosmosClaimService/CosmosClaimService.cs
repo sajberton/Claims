@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Claims.Services
 {
-    public class CosmosClaimService
+    public class CosmosClaimService : ICosmosClaimService
     {
         private readonly Container _container;
 
