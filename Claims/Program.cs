@@ -16,13 +16,8 @@ services.AddControllers().AddJsonOptions(x =>
     }
 );
 
-var cosmosClient = InitializeCosmosClientInstanceAsync(builder.Configuration.GetSection("CosmosDb")).GetAwaiter().GetResult();
-
-services.AddSingleton(
-    InitializeCosmosClaimServiceAsync(builder.Configuration.GetSection("CosmosDb"), cosmosClient).GetAwaiter().GetResult());
-
-services.AddSingleton(
-    InitializeCosmosCoverServiceAsync(builder.Configuration.GetSection("CosmosDb"), cosmosClient).GetAwaiter().GetResult());
+var configSectionCosmos = builder.Configuration.GetSection("CosmosDb");
+services.AddCosmosDbServices(configSectionCosmos);
 
 services.AddServices();
 
@@ -54,47 +49,4 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
-
-static async Task<CosmosClient> InitializeCosmosClientInstanceAsync(IConfigurationSection configurationSection)
-{
-    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-    string containerName = configurationSection.GetSection("ContainerName").Value;
-    string account = configurationSection.GetSection("Account").Value;
-    string key = configurationSection.GetSection("Key").Value;
-    Microsoft.Azure.Cosmos.CosmosClient client = new Microsoft.Azure.Cosmos.CosmosClient(account, key);
-   // CosmosClaimService cosmosDbService = new CosmosClaimService(client, databaseName, containerName);
-    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
-
-    return client;
-}
-
-static async Task<ICosmosClaimService> InitializeCosmosClaimServiceAsync(IConfigurationSection configurationSection, CosmosClient client)
-{
-    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-    string containerName = configurationSection.GetSection("ContainerName").Value;
-    string account = configurationSection.GetSection("Account").Value;
-    string key = configurationSection.GetSection("Key").Value;
-   // Microsoft.Azure.Cosmos.CosmosClient client = new Microsoft.Azure.Cosmos.CosmosClient(account, key);
-    CosmosClaimService cosmosDbService = new CosmosClaimService(client, databaseName, containerName);
-    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
-
-    return cosmosDbService;
-}
-
-static async Task<ICosmosCoverService> InitializeCosmosCoverServiceAsync(IConfigurationSection configurationSection, CosmosClient client)
-{
-    string databaseName = configurationSection.GetSection("DatabaseName").Value;
-    string containerName = configurationSection.GetSection("ContainerNameCover").Value;
-    string account = configurationSection.GetSection("Account").Value;
-    string key = configurationSection.GetSection("Key").Value;
-    // Microsoft.Azure.Cosmos.CosmosClient client = new Microsoft.Azure.Cosmos.CosmosClient(account, key);
-    CosmosCoverService cosmosDbService = new CosmosCoverService(client, databaseName, containerName);
-    Microsoft.Azure.Cosmos.DatabaseResponse database = await client.CreateDatabaseIfNotExistsAsync(databaseName);
-    await database.Database.CreateContainerIfNotExistsAsync(containerName, "/id");
-
-    return cosmosDbService;
-}
-
 public partial class Program { }
